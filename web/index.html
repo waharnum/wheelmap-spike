@@ -7,6 +7,7 @@
     </head>
     <body>
         <h1>Wheelmap / accessibility.cloud Widgets</h1>
+        <h2>Fixed Location Buttons</h2>
         <p>
             <button class="map-button" type="button" data-lat="43.6542386" data-lon="-79.3913016">
                 Toronto
@@ -18,6 +19,10 @@
                 Vaughan
             </button>
         </p>
+        <h2>Basic Search</h2>
+        <p>
+            This search uses OSM's reverse geocoding tool, <a href="https://wiki.openstreetmap.org/wiki/Nominatim">Nominatim</a>
+        </p>
         <p>
             <label for="search">Location / Place Name</label>
             <input class="search-field" id="search" />
@@ -27,10 +32,15 @@
             </ul>
         </p>
         <h2>Wheelmap Embedded Map</h2>
+        <p>
+            Uses a widget available from the account interface at <a href="https://wheelmap.org/en/profile/widgets">https://wheelmap.org/en/profile/widgets</a>  - loads in an iFrame, may have keyboard accessibility issues, limited customization available.
+        </p>
         <iframe allow="geolocation" class="map-frame" width="700" height="500"></iframe>
 
-        <h2>accessibility.cloud Javascript widget</h2>
-
+        <h2>accessibility.cloud results Javascript widget</h2>
+        <p>
+            Uses the Javascript widget described at <a href="https://github.com/sozialhelden/accessibility-cloud-js">https://github.com/sozialhelden/accessibility-cloud-js</a>.            
+        </p>
         <div id="accessibility-cloud-results"></div>
 
 
@@ -57,11 +67,8 @@
             var promise = fluid.promise();
             promise.then(
                 function(result) {
-                    console.log("Reverse geocoding returned result", result);
-                    var lat = result[0].lat;
-                    var lon = result[0].lon;
+                    console.log("Reverse geocoding returned results", result);
                     displaySearchResults(result);
-                    updateLocationDisplay(lat, lon);
                 },
                 function (error) {
                     console.log("Error occured", error)
@@ -71,13 +78,13 @@
         })
 
         var displaySearchResults = function (results) {
+            $(".search-display").empty();
             fluid.each(results, function (result) {
                 $(".search-display").append(
                     `<li>
-                        ${result.display_name}
-                        <button class="map-button" type="button" data-lat="${result.lat}" data-lon="${result.lon}">
-                            Map
-                        </button>
+                    <button class="map-button" type="button" data-lat="${result.lat}" data-lon="${result.lon}">
+                        Map
+                    </button> ${result.display_name}
                     </li>`
                 )
             })
@@ -104,6 +111,7 @@
             var mapFrame = $(".map-frame");
             mapFrame.attr("src", mapSRC);
 
+            // Update results from accessibility.cloud
             $("#accessibility-cloud-results").empty();
 
               var element = document.querySelector('#accessibility-cloud-results');
@@ -113,8 +121,8 @@
                   requestParameters: {
                     latitude: lat, // <-- Replace these coordinates with your own
                     longitude: lon,
-                    accuracy: 5000, // <-- Search radius, in meters
-                    limit: 50 // <-- Maximal number of returned results
+                    accuracy: 1000, // <-- Search radius, in meters
+                    limit: 50, // <-- Maximal number of returned results
                     // The following line displays only places accessible by wheelchair. Remove it to return all places.
                     // filter: 'at-least-partially-accessible-by-wheelchair',
                   },
