@@ -1,0 +1,129 @@
+<html>
+    <head>
+        <title>Wheelmap Embed Demonstration</title>
+        <script src="https://unpkg.com/infusion@2.0.0/dist/infusion-all.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sozialhelden/accessibility-cloud-js@3.2.1/build/example/accessibility.cloud-3.2.1-2350f78a.css">
+        <script type="text/javascript" async defer src="https://cdn.jsdelivr.net/gh/sozialhelden/accessibility-cloud-js@3.2.1/build/example/accessibility.cloud-3.2.1-21a6710d.min.js"></script>
+    </head>
+    <body>
+        <h1>Wheelmap / accessibility.cloud Widgets</h1>
+        <p>
+            <button class="map-button" type="button" data-lat="43.6542386" data-lon="-79.3913016">
+                Toronto
+            </button>
+            <button class="map-button" type="button" data-lat="43.5890", data-lon="-79.6441">
+                Missisauga
+            </button>
+            <button class="map-button" type="button" data-lat="43.8372", data-lon="-79.5083">
+                Vaughan
+            </button>
+        </p>
+        <p>
+            <label for="search">Location / Place Name</label>
+            <input class="search-field" id="search" />
+            <button class="search-button" type="button">Search</button>
+            <ul class="search-display">
+
+            </ul>
+        </p>
+        <h2>Wheelmap Embedded Map</h2>
+        <iframe allow="geolocation" class="map-frame" width="700" height="500"></iframe>
+
+        <h2>accessibility.cloud Javascript widget</h2>
+
+        <div id="accessibility-cloud-results"></div>
+
+
+    <script>
+
+    window.onAccessibilityCloudLoaded = function(AccessibilityCloud) {
+        window.AccessibilityCloud = AccessibilityCloud;
+        var zoom = 16;
+
+        addMapButtonHandlers = function () {
+            $(".map-button").click(function (e) {
+                var clickedButton = $(this);
+                var lat = clickedButton.attr("data-lat");
+                var lon = clickedButton.attr("data-lon");
+                updateLocationDisplay(lat, lon);
+            });
+        }
+
+        addMapButtonHandlers();
+
+        $(".search-button").click(function (e) {
+            console.log("search button was clicked");
+            var searchString = $(".search-field").val();
+            var promise = fluid.promise();
+            promise.then(
+                function(result) {
+                    console.log("Reverse geocoding returned result", result);
+                    var lat = result[0].lat;
+                    var lon = result[0].lon;
+                    displaySearchResults(result);
+                    updateLocationDisplay(lat, lon);
+                },
+                function (error) {
+                    console.log("Error occured", error)
+                }
+            )
+            reverseGeocode(searchString, promise);
+        })
+
+        var displaySearchResults = function (results) {
+            fluid.each(results, function (result) {
+                $(".search-display").append(
+                    `<li>
+                        ${result.display_name}
+                        <button class="map-button" type="button" data-lat="${result.lat}" data-lon="${result.lon}">
+                            Map
+                        </button>
+                    </li>`
+                )
+            })
+            addMapButtonHandlers();
+        }
+
+        var reverseGeocode = function (searchString, promise) {
+            var requestURL = `https://nominatim.openstreetmap.org/search/${searchString}?format=json&addressdetails=1&limit=5`;
+            var request = $.get(requestURL);
+
+            request.done(function(result) {
+              promise.resolve(result);
+            });
+
+            request.fail(function (err) {
+                promise.reject(err);
+            })
+
+        }
+
+        var updateLocationDisplay = function (lat, lon) {
+            // Update embedded map from Wheelmap
+            var mapSRC = `//wheelmap.org/en/embed/R35pHTzT341A2swysuY-#/?lat=${lat}&lon=${lon}&zoom=${zoom}`;
+            var mapFrame = $(".map-frame");
+            mapFrame.attr("src", mapSRC);
+
+            $("#accessibility-cloud-results").empty();
+
+              var element = document.querySelector('#accessibility-cloud-results');
+              AccessibilityCloud.render(element, {
+                token: 'd1f5b738a430cec864da77382ea4b189',
+                  locale: 'en_CA',
+                  requestParameters: {
+                    latitude: lat, // <-- Replace these coordinates with your own
+                    longitude: lon,
+                    accuracy: 5000, // <-- Search radius, in meters
+                    limit: 50 // <-- Maximal number of returned results
+                    // The following line displays only places accessible by wheelchair. Remove it to return all places.
+                    // filter: 'at-least-partially-accessible-by-wheelchair',
+                  },
+              });
+        }
+    }
+
+
+
+    </script>
+    </body>
+</html>
