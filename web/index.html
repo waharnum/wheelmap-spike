@@ -35,11 +35,13 @@
         <p>
             Uses a widget available from the account interface at <a href="https://wheelmap.org/en/profile/widgets">https://wheelmap.org/en/profile/widgets</a>  - loads in an iFrame, may have keyboard accessibility issues, limited customization available.
         </p>
-        <iframe allow="geolocation" class="map-frame" width="700" height="500"></iframe>
+        <div id="wheelmap-embedded-map">
+
+        </div>
 
         <h2>accessibility.cloud results Javascript widget</h2>
         <p>
-            Uses the Javascript widget described at <a href="https://github.com/sozialhelden/accessibility-cloud-js">https://github.com/sozialhelden/accessibility-cloud-js</a>.            
+            Uses the Javascript widget described at <a href="https://github.com/sozialhelden/accessibility-cloud-js">https://github.com/sozialhelden/accessibility-cloud-js</a>.
         </p>
         <div id="accessibility-cloud-results"></div>
 
@@ -107,9 +109,14 @@
 
         var updateLocationDisplay = function (lat, lon) {
             // Update embedded map from Wheelmap
-            var mapSRC = `//wheelmap.org/en/embed/R35pHTzT341A2swysuY-#/?lat=${lat}&lon=${lon}&zoom=${zoom}`;
-            var mapFrame = $(".map-frame");
-            mapFrame.attr("src", mapSRC);
+
+            var mapContainer = $("#wheelmap-embedded-map");
+            mapContainer.empty();
+            mapContainer.append(
+                `
+                <iframe allow="geolocation" class="map-frame" width="700" height="500" src="//wheelmap.org/en/embed/R35pHTzT341A2swysuY-#/?lat=${lat}&lon=${lon}&zoom=${zoom}"></iframe>
+                `
+            )
 
             // Update results from accessibility.cloud
             $("#accessibility-cloud-results").empty();
