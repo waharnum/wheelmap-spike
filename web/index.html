@@ -32,10 +32,21 @@
             </ul>
         </p>
         <h2>Wheelmap Embedded Map</h2>
+        <h3>Current Embed Widget</h3>
         <p>
-            Uses a widget available from the account interface at <a href="https://wheelmap.org/en/profile/widgets">https://wheelmap.org/en/profile/widgets</a>  - loads in an iFrame, may have keyboard accessibility issues, limited customization available.
+            Uses a widget available from the account interface at <a href="https://wheelmap.org/en/profile/widgets">https://wheelmap.org/en/profile/widgets</a>  - loads in an iFrame, some keyboard accessibility issues based on initial testing, limited customization available.
         </p>
-        <div id="wheelmap-embedded-map">
+        <div class="map-container" id="wheelmap-embedded-map">
+
+        </div>
+
+        <h3>Wheelmap Beta Embed</h3>
+
+        <p>
+            Embeds the current wheelmap beta site directly in an iframe. Not optimized for "widget"-style display, but sort of works because the new site is responsively designed. Better keyboard accessibility.
+        </p>
+
+        <div class="map-container" id="wheelmap-embedded-map-beta">
 
         </div>
 
@@ -81,15 +92,20 @@
 
         var displaySearchResults = function (results) {
             $(".search-display").empty();
-            fluid.each(results, function (result) {
-                $(".search-display").append(
-                    `<li>
-                    <button class="map-button" type="button" data-lat="${result.lat}" data-lon="${result.lon}">
-                        Map
-                    </button> ${result.display_name}
-                    </li>`
-                )
-            })
+            if(results.length <1) {
+                $(".search-display").append("<li>Sorry, no results were found for that search.</li>")               
+            }
+            else {
+                fluid.each(results, function (result) {
+                    $(".search-display").append(
+                        `<li>
+                        <button class="map-button" type="button" data-lat="${result.lat}" data-lon="${result.lon}">
+                            Map
+                        </button> ${result.display_name}
+                        </li>`
+                    )
+                })
+            }
             addMapButtonHandlers();
         }
 
@@ -110,13 +126,14 @@
         var updateLocationDisplay = function (lat, lon) {
             // Update embedded map from Wheelmap
 
-            var mapContainer = $("#wheelmap-embedded-map");
-            mapContainer.empty();
-            mapContainer.append(
-                `
-                <iframe allow="geolocation" class="map-frame" width="700" height="500" src="//wheelmap.org/en/embed/R35pHTzT341A2swysuY-#/?lat=${lat}&lon=${lon}&zoom=${zoom}"></iframe>
-                `
-            )
+
+            $(".map-container").empty();
+            var wheelmapEmbedMarkup = `<iframe allow="geolocation" class="map-frame" width="700" height="500" src="//wheelmap.org/en/embed/R35pHTzT341A2swysuY-#/?lat=${lat}&lon=${lon}&zoom=${zoom}"></iframe>`;
+            var wheelmapEmbedMarkupBeta = `<iframe allow="geolocation" class="map-frame" width="700" height="500" src="//wheelmap.org/beta/#?lat=${lat}&lon=${lon}&zoom=${zoom}"></iframe>`;
+
+            $("#wheelmap-embedded-map").append(wheelmapEmbedMarkup);
+
+            $("#wheelmap-embedded-map-beta").append(wheelmapEmbedMarkupBeta)
 
             // Update results from accessibility.cloud
             $("#accessibility-cloud-results").empty();
