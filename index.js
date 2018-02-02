@@ -11,6 +11,9 @@ var bigidea = fluid.registerNamespace("bigidea");
 // Wrapper for https://www.npmjs.com/package/node-rest-client
 fluid.defaults("bigidea.restClient", {
     gradeNames: ["fluid.component"],
+    // See https://www.npmjs.com/package/node-rest-client#options-parameters
+    clientOptions: {
+    },
     restConfig: {
         url: "",
         headers: {
@@ -21,7 +24,7 @@ fluid.defaults("bigidea.restClient", {
         },
         data: {
         },
-        requestConfig: {            
+        requestConfig: {
         },
         responseConfig: {
         }
@@ -40,7 +43,7 @@ fluid.defaults("bigidea.restClient", {
 });
 
 bigidea.restClient.initializeClient = function (that) {
-    that.client = new Client();
+    that.client = new Client(that.options.clientOptions);
 };
 
 bigidea.restClient.get = function(that) {
@@ -75,8 +78,8 @@ var acClient = bigidea.restClient({
             "Accept": "application/json"
         },
         parameters: {
-            latitude: 48.2435,
-            longitude: 16.3974,
+            latitude: 43.6542386,
+            longitude: -79.3913016,
             accuracy: 1000
         }
     },
@@ -86,7 +89,9 @@ var getPromise = acClient.get();
 
     getPromise.then(
         function (response) {
-            console.log(response);
+            fluid.each(response.data.features, function (feature) {
+                console.log(feature, feature.properties.accessibility);
+            });
         },
         function (error) {
             console.log(error);
